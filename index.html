@@ -42,4 +42,299 @@
     .button-row button { flex: 1; padding: 0.8rem 1.5rem; font-size: 14px; font-weight: 600; }
     .success-message { display: none; background: #e8f5e9; border-left: 4px solid #4caf50; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; color: #2e7d32; font-size: 14px; }
     .success-message.show { display: block; }
-    .code-input-section { background: white
+    .code-input-section { background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
+    .code-input-section h2 { font-size: 16px; font-weight: 600; margin-bottom: 1rem; color: #1a3a52; }
+    .code-input-group { display: flex; gap: 1rem; margin-bottom: 1rem; justify-content: center; }
+    .code-input-group input { padding: 0.75rem 1rem; border: 2px solid #ddd; border-radius: 4px; font-size: 16px; font-family: 'Courier New', monospace; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; min-width: 250px; }
+    .code-input-group input:focus { outline: none; border-color: #f0743d; background: #fff9f6; }
+    .code-input-group button { padding: 0.75rem 1.5rem; background: #1a3a52; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; }
+    .code-input-group button:hover { background: #2c4f6d; }
+    .loaded-info { background: #e8f5e9; border: 1px solid #4caf50; border-radius: 4px; padding: 1rem; margin-top: 1rem; color: #2e7d32; text-align: center; display: none; }
+    .loaded-info.show { display: block; }
+    @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .button-row { flex-direction: column; } .code-input-group { flex-direction: column; } .code-input-group input { min-width: auto; } .container { padding: 1rem 0.5rem; } }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="header-logo">📋 FORMADIRECT</div>
+    <h1>Feuille d'Émargement</h1>
+    <p>Signature STAGIAIRE</p>
+    <div class="badge">VERSION STAGIAIRE</div>
+  </div>
+
+  <div class="info-box">
+    ℹ️ <strong>Stagiaire</strong> : Entrez le code fourni par le formateur, puis signez.
+  </div>
+
+  <div id="successMessage" class="success-message">
+    ✅ Signature envoyée ! Le formateur peut maintenant générer le PDF final.
+  </div>
+
+  <div class="code-input-section">
+    <h2>🔐 Entrez votre code de session</h2>
+    <div class="code-input-group">
+      <input type="text" id="codeInput" placeholder="FD-20250401-XXXXXX" maxlength="20">
+      <button onclick="chargerSession()">🔓 Charger</button>
+    </div>
+    <div id="loadedInfo" class="loaded-info">
+      ✅ Session chargée ! Les informations sont pré-remplies. Veuillez signer.
+    </div>
+  </div>
+
+  <div id="formSection" style="opacity: 0.5; pointer-events: none;">
+    
+    <div class="form-section">
+      <h2>📝 Stagiaire</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="prenom">Prénom</label>
+          <input type="text" id="prenom" disabled>
+        </div>
+        <div class="form-group">
+          <label for="nom">Nom</label>
+          <input type="text" id="nom" disabled>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>📚 Formation</h2>
+      <div class="form-grid full">
+        <div class="form-group">
+          <label for="formation">Formation</label>
+          <input type="text" id="formation" disabled>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>⏰ Cours</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="dateDebut">Date du cours</label>
+          <input type="text" id="dateDebut" disabled>
+        </div>
+        <div class="form-group">
+          <label for="heureDebut">Heure début</label>
+          <input type="text" id="heureDebut" disabled>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="heureFin">Heure fin</label>
+          <input type="text" id="heureFin" disabled>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>👨‍🏫 Formateur</h2>
+      <div class="form-grid full">
+        <div class="form-group">
+          <label for="nomFormateur">Nom du formateur</label>
+          <input type="text" id="nomFormateur" disabled>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>✍️ Votre Signature</h2>
+      
+      <div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label for="dateSignStagiaire">Date signature (JJ/MM/AAAA) *</label>
+          <input type="text" id="dateSignStagiaire" placeholder="15/04/2025">
+        </div>
+        <div class="signature-container">
+          <span class="signature-label">Signez ici (souris ou doigt)</span>
+          <div class="canvas-wrapper">
+            <canvas id="canvasStagiaire"></canvas>
+          </div>
+          <div class="btn-group">
+            <button class="btn-small" onclick="effacerSignature()">🗑️ Effacer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="button-row">
+      <button class="btn-primary" onclick="envoyerSignature()">📤 Envoyer ma signature</button>
+      <button class="btn-secondary" onclick="reinitialiser()">🔄 Réinitialiser</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let sessionCode = null;
+let sessionData = null;
+
+function chargerSession() {
+  const code = document.getElementById('codeInput').value.trim().toUpperCase();
+  
+  if (!code) {
+    alert('Veuillez entrer un code');
+    return;
+  }
+  
+  const data = localStorage.getItem('session_' + code);
+  
+  if (!data) {
+    alert('Code invalide ou session expiree');
+    return;
+  }
+  
+  sessionCode = code;
+  sessionData = JSON.parse(data);
+  
+  document.getElementById('prenom').value = sessionData.prenom;
+  document.getElementById('nom').value = sessionData.nom;
+  document.getElementById('formation').value = sessionData.formation;
+  document.getElementById('dateDebut').value = sessionData.dateDebut;
+  document.getElementById('heureDebut').value = sessionData.heureDebut;
+  document.getElementById('heureFin').value = sessionData.heureFin;
+  document.getElementById('nomFormateur').value = sessionData.nomFormateur;
+  
+  document.getElementById('formSection').style.opacity = '1';
+  document.getElementById('formSection').style.pointerEvents = 'auto';
+  document.getElementById('codeInput').disabled = true;
+  document.getElementById('loadedInfo').classList.add('show');
+  
+  document.getElementById('codeInput').style.opacity = '0.5';
+}
+
+function initCanvas() {
+  const canvas = document.getElementById('canvasStagiaire');
+  const ctx = canvas.getContext('2d');
+  const wrapper = canvas.parentElement;
+  
+  function resizeCanvas() {
+    const rect = wrapper.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    
+    canvas.width = rect.width * dpr;
+    canvas.height = 150 * dpr;
+    
+    ctx.scale(dpr, dpr);
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#000000';
+  }
+  
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  
+  let isDrawing = false;
+  let lastX = 0, lastY = 0;
+  
+  function getCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+    const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+    return { x, y };
+  }
+  
+  function start(e) {
+    isDrawing = true;
+    const { x, y } = getCoords(e);
+    lastX = x;
+    lastY = y;
+    e.preventDefault();
+  }
+  
+  function draw(e) {
+    if (!isDrawing) return;
+    const { x, y } = getCoords(e);
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    lastX = x;
+    lastY = y;
+    e.preventDefault();
+  }
+  
+  function end() {
+    isDrawing = false;
+  }
+  
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', end);
+  canvas.addEventListener('mouseout', end);
+  canvas.addEventListener('touchstart', start, false);
+  canvas.addEventListener('touchmove', draw, false);
+  canvas.addEventListener('touchend', end, false);
+}
+
+initCanvas();
+
+function effacerSignature() {
+  const canvas = document.getElementById('canvasStagiaire');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function validerFormulaire() {
+  if (!sessionCode || !sessionData) {
+    alert('Veuillez charger la session avec un code');
+    return false;
+  }
+  
+  if (!document.getElementById('dateSignStagiaire').value.trim()) {
+    alert('La date de signature est obligatoire');
+    return false;
+  }
+  
+  const canvas = document.getElementById('canvasStagiaire');
+  const ctx = canvas.getContext('2d');
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  
+  let hasSignature = false;
+  for (let i = 3; i < img.data.length; i += 4) {
+    if (img.data[i] > 128) hasSignature = true;
+  }
+  
+  if (!hasSignature) {
+    alert('Signature vide - dessinez votre signature');
+    return false;
+  }
+  
+  return true;
+}
+
+function envoyerSignature() {
+  if (!validerFormulaire()) return;
+  
+  const sig = document.getElementById('canvasStagiaire').toDataURL('image/png');
+  
+  localStorage.setItem('signature_' + sessionCode, sig);
+  
+  document.getElementById('successMessage').classList.add('show');
+  setTimeout(() => {
+    document.getElementById('successMessage').classList.remove('show');
+  }, 5000);
+  
+  alert('Signature envoyee au formateur !');
+}
+
+function reinitialiser() {
+  if (confirm('Reinitialiser ?')) {
+    document.getElementById('codeInput').value = '';
+    document.getElementById('codeInput').disabled = false;
+    document.getElementById('codeInput').style.opacity = '1';
+    document.getElementById('dateSignStagiaire').value = '';
+    effacerSignature();
+    document.getElementById('formSection').style.opacity = '0.5';
+    document.getElementById('formSection').style.pointerEvents = 'none';
+    document.getElementById('loadedInfo').classList.remove('show');
+    sessionCode = null;
+    sessionData = null;
+  }
+}
+</script>
+
+</body>
+</html>
